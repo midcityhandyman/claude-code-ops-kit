@@ -32,7 +32,8 @@ query or a read-back that fails right now and will pass when the item is done.
 
 These are the exact rules in `ops_kit/checklist.py`, covered by `tests/test_checklist.py`.
 
-- An item is a line starting with `-`, `*` or `+`, then `[ ]`, `[x]` or `[X]`.
+- An item is a line starting with `-`, `*`, `+` or a list number (`1.` or `1)`), then `[ ]`,
+  `[x]` or `[X]`.
 - A label is the whole word `blocked` or `open`, a colon, and at least one character of
   reason. `blocked:` with nothing after it does not count. `reopen:` is not a label.
 - Labels are case insensitive. If both appear, the first one wins.
@@ -41,7 +42,8 @@ These are the exact rules in `ops_kit/checklist.py`, covered by `tests/test_chec
 - Nested task list lines are items in their own right.
 - Lines inside fenced code blocks are ignored.
 - With `OPS_KIT_REQUIRE_EVIDENCE=1`, a ticked item without `evidence: <text>` is treated
-  as unresolved.
+  as unresolved. The same setting applies to `scripts/scope_status.py` and to
+  `write_summary.py --strict`, so all three agree on what blocks.
 
 ## Why labels instead of deleting the line
 

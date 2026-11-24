@@ -24,6 +24,14 @@ def test_hooks_file_uses_wrapper_and_points_at_real_scripts():
                 assert match, "plugin root must be quoted in shell form"
                 assert (REPO / match.group(1)).is_file()
     assert "matcher" not in config["hooks"]["Stop"][0]  # Stop does not support matchers
+    # A forked session gets a new id, so it needs its own scope path in context.
+    assert set(config["hooks"]["SessionStart"][0]["matcher"].split("|")) == {
+        "startup",
+        "resume",
+        "clear",
+        "compact",
+        "fork",
+    }
 
 
 def test_skills_have_frontmatter_on_line_one():

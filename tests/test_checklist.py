@@ -102,3 +102,18 @@ def test_env_flag():
     assert cl.env_flag({"A": "1"}, "A") and cl.env_flag({"A": "TRUE"}, "A")
     assert not cl.env_flag({"A": "0"}, "A") and not cl.env_flag({}, "A")
     assert cl.env_flag({}, "A", default=True) and not cl.env_flag({"A": "off"}, "A", default=True)
+
+
+def test_numbered_task_list_lines_are_items():
+    assert states("1. [ ] first\n2) [x] second\n3. [ ] third. open: owner is the user\n") == [
+        cl.UNLABELED,
+        cl.DONE,
+        cl.OPEN,
+    ]
+    assert states("2030. plain numbered line [ ] is not a task\n") == []
+
+
+def test_byte_order_mark_does_not_hide_the_first_item(tmp_path):
+    path = tmp_path / "scope-bom.md"
+    path.write_bytes(b"\xef\xbb\xbf- [ ] first line item\n- [x] second\n")
+    assert [i.state() for i in cl.read_scope(path)] == [cl.UNLABELED, cl.DONE]

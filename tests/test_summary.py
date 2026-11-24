@@ -1,5 +1,8 @@
 import io
 import json
+import os
+import subprocess
+import sys
 from datetime import datetime, timezone
 
 from conftest import REPO, SESSION, SHORT
@@ -87,3 +90,37 @@ def test_bad_usage(workdir):
     assert run_cli(["--cwd", str(workdir)])[0] == 2
     code, _, err = run_cli(["--session", "///", "--cwd", str(workdir)])
     assert code == 2 and "session id" in err
+
+
+def test_missing_notes_file_is_a_clean_error(workdir):
+    code, out, err = run_cli(["--session", SESSION, "--cwd", str(workdir), "--notes-file", str(workdir / "nope.txt")])
+    assert code == 2 and out == "" and "wrap-up failed" in err
+    assert not (workdir / ".context" / "session-log.jsonl").exists()
+
+
+def test_strict_honors_require_evidence_like_the_stop_hook(workdir, write_scope):
+    write_scope("- [x] Add retry\n- [ ] Backfill. open: dry run next, owner is the data team\n")
+    args = (str(workdir), SESSION, "t", "n", NOW)
+    refused = summary.write_summary(*args, {"OPS_KIT_REQUIRE_EVIDENCE": "1"}, strict=True)
+    assert refused["written"] is False and refused["unlabeled"] == ["Add retry"]
+    assert summary.write_summary(*args, {}, strict=True)["written"] is True
+
+
+def test_scope_status_exit_code_matches_the_stop_hook(workdir, write_scope):
+    write_scope("- [x] Add retry\n- [ ] Backfill. open: dry run next, owner is the data team\n")
+    script = str(REPO / "scripts" / "scope_status.py")
+
+    def status(strict):
+        env = {k: v for k, v in os.environ.items() if not k.startswith("OPS_KIT_")}
+        env["OPS_KIT_REQUIRE_EVIDENCE"] = strict
+        result = subprocess.run(
+            [sys.executable, script, "--session", SESSION, "--cwd", str(workdir)],
+            capture_output=True,
+            env=env,
+            timeout=60,
+        )
+        return result.returncode, result.stdout.decode("utf-8")
+
+    assert status("0")[0] == 0
+    code, out = status("1")
+    assert code == 1 and out.startswith("unproven") and "1 ticked without evidence" in out

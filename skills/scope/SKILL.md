@@ -45,5 +45,6 @@ reporting an in-scope problem and asking whether to fix it.
 python "${CLAUDE_PLUGIN_ROOT}/scripts/scope_status.py" --session ${CLAUDE_SESSION_ID}
 ```
 
-It prints each item with its state and exits 1 while anything is unlabeled, which is
-exactly the condition the Stop hook refuses.
+It prints each item with its state and exits 1 on the same condition the Stop hook
+refuses: an unticked item with no label, or, when `OPS_KIT_REQUIRE_EVIDENCE=1` is set,
+a ticked item without `evidence:`.

@@ -4,7 +4,7 @@ Writes two things under <cwd>/<scope dir>/:
     session-summaries/<date>-<short id>.md   the readable summary
     session-log.jsonl                        one JSON line per wrap-up, for feeds and reports
 
-Exit codes: 0 written, 1 refused (strict mode and items are still unlabeled), 2 bad usage.
+Exit codes: 0 written, 1 refused (strict mode and items are still unresolved), 2 bad usage or unreadable input.
 """
 
 from __future__ import annotations
@@ -65,8 +65,10 @@ def write_summary(
     scope_path = cl.find_scope_file(cwd, session_id, env)
     items = cl.read_scope(scope_path) if scope_path else []
     tally = cl.counts(items)
-    if strict and tally[cl.UNLABELED]:
-        return {"written": False, "unlabeled": [i.text for i in cl.unresolved(items)], "counts": tally}
+    # Strict refuses on the same condition the Stop hook blocks on.
+    pending = cl.unresolved(items, cl.env_flag(env, "OPS_KIT_REQUIRE_EVIDENCE"))
+    if strict and pending:
+        return {"written": False, "unlabeled": [i.text for i in pending], "counts": tally}
 
     base = Path(cwd) / cl.scope_dir_name(env)
     out_dir = base / SUMMARY_DIR
@@ -103,18 +105,18 @@ def main(argv: Sequence[str], stdin: IO[str], stdout: IO[str], stderr: IO[str], 
     parser.add_argument("--notes", default="", help="summary text, or '-' to read it from stdin")
     parser.add_argument("--notes-file", default="", help="read the summary text from this file")
     parser.add_argument("--now", default="", help="ISO timestamp to use instead of the clock (for tests)")
-    parser.add_argument("--strict", action="store_true", help="refuse while any item is unticked and unlabeled")
+    parser.add_argument("--strict", action="store_true", help="refuse while the Stop hook would block (unticked and unlabeled items)")
     try:
         args = parser.parse_args(list(argv))
     except SystemExit:
         return 2
 
     notes = args.notes
-    if args.notes_file:
-        notes = Path(args.notes_file).read_text(encoding="utf-8")
-    elif notes == "-":
-        notes = stdin.read()
     try:
+        if args.notes_file:
+            notes = Path(args.notes_file).read_text(encoding="utf-8")
+        elif notes == "-":
+            notes = stdin.read()
         result = write_summary(args.cwd, args.session, args.title, notes, _parse_now(args.now), env, args.strict)
     except (ValueError, OSError) as exc:
         stderr.write("ops-kit wrap-up failed: %s\n" % exc)

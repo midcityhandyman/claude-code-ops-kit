@@ -27,7 +27,7 @@ This session's id is `${CLAUDE_SESSION_ID}`. Title, if one was passed: $ARGUMENT
    ```
 
    `--strict` makes the script refuse (exit code 1) while any item is unticked and
-   unlabeled. If it refuses, go back to step 1. Do not drop `--strict` to get past it.
+   unlabeled, the same condition the Stop hook blocks on. If it refuses, go back to step 1. Do not drop `--strict` to get past it.
 4. Read back the file the script printed and confirm it matches the session.
 5. Tell the user, in one or two lines: the summary path, the item counts, and each
    blocked item with the one thing they must do.

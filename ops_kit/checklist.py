@@ -30,7 +30,7 @@ OPEN = "open"
 UNLABELED = "unlabeled"
 UNPROVEN = "unproven"  # ticked without evidence, only used in strict mode
 
-_ITEM_RE = re.compile(r"^(?P<indent>[ \t]*)[-*+][ \t]+\[(?P<mark>[ xX])\][ \t]*(?P<text>.*)$")
+_ITEM_RE = re.compile(r"^(?P<indent>[ \t]*)(?:[-*+]|\d{1,9}[.)])[ \t]+\[(?P<mark>[ xX])\][ \t]*(?P<text>.*)$")
 _FENCE_RE = re.compile(r"^[ \t]*(```|~~~)")
 # A label needs a reason after the colon. "blocked:" on its own does not count.
 _LABEL_RE = re.compile(r"(?<![\w-])(?P<label>blocked|open)[ \t]*:[ \t]*(?P<note>\S.*)", re.IGNORECASE)
@@ -157,7 +157,8 @@ def find_scope_file(cwd: object, session_id: object, env: Mapping[str, str]) -> 
 
 
 def read_scope(path: Path) -> List[Item]:
-    return parse_scope(path.read_text(encoding="utf-8", errors="replace"))
+    # utf-8-sig: a byte order mark must not hide an item on line 1.
+    return parse_scope(path.read_text(encoding="utf-8-sig", errors="replace"))
 
 
 def env_flag(env: Mapping[str, str], name: str, default: bool = False) -> bool:
