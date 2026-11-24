@@ -51,7 +51,7 @@ flowchart TD
 
 ## Run it
 
-Requires Python 3.9 or later on `PATH` as `python` or `python3`.
+Requires Python 3.10 or later on `PATH` as `python` or `python3`.
 
 ```bash
 git clone <this repo> && cd claude-code-ops-kit

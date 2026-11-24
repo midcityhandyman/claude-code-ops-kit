@@ -2,7 +2,7 @@
 name = "ops-kit"
 version = "0.1.0"
 description = "Hook logic for the ops-kit Claude Code plugin"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = []
 
 [project.optional-dependencies]
