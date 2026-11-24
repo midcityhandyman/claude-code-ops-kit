@@ -1,0 +1,10 @@
+{
+  "name": "ops-kit",
+  "displayName": "Ops Kit",
+  "version": "0.1.0",
+  "description": "A Stop hook that holds the turn open while the session scope checklist has unresolved items, a scope checklist convention, and a wrap-up skill that writes a session summary.",
+  "author": {
+    "name": "ops-kit maintainers"
+  },
+  "keywords": ["hooks", "stop-hook", "checklist", "definition-of-done", "wrap-up"]
+}

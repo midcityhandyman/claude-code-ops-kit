@@ -1,0 +1,28 @@
+{
+  "description": "Scope checklist gate: remind at session start, hold the turn open at Stop while items are unresolved",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(command -v python || command -v python3)\" \"${CLAUDE_PLUGIN_ROOT}\"/scripts/session_start.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(command -v python || command -v python3)\" \"${CLAUDE_PLUGIN_ROOT}\"/scripts/stop_gate.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

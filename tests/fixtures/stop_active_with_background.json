@@ -1,0 +1,19 @@
+{
+  "session_id": "5e11a0c4-0000-4000-8000-000000000001",
+  "transcript_path": "~/.claude/projects/sample/5e11a0c4-0000-4000-8000-000000000001.jsonl",
+  "cwd": "__CWD__",
+  "permission_mode": "default",
+  "hook_event_name": "Stop",
+  "stop_hook_active": true,
+  "last_assistant_message": "Waiting on the build.",
+  "background_tasks": [
+    {
+      "id": "task-001",
+      "type": "shell",
+      "status": "running",
+      "description": "run the build",
+      "command": "make build"
+    }
+  ],
+  "session_crons": []
+}

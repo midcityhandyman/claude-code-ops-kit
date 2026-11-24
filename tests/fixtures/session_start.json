@@ -1,0 +1,8 @@
+{
+  "session_id": "5e11a0c4-0000-4000-8000-000000000001",
+  "transcript_path": "~/.claude/projects/sample/5e11a0c4-0000-4000-8000-000000000001.jsonl",
+  "cwd": "__CWD__",
+  "hook_event_name": "SessionStart",
+  "source": "startup",
+  "model": "sample-model"
+}

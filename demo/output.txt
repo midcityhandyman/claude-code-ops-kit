@@ -1,0 +1,73 @@
+ops-kit demo: one session, replayed offline through the real hook scripts
+==========================================================================
+
+[1] SessionStart hook fires
+      | ops-kit scope checklist for this session: .context/scope-d3m05e55.md (relative to the working directory).
+      | For any task that changes files or runs commands, write the scope there first, one line per item: '- [ ] item (done when: <check>)'.
+      | The check is a command, query or read-back that fails now and passes when the item is done.
+      | End every item in one of three states: '- [x] ... evidence: <proof>', '- [ ] ... blocked: <first failing check and what the user must do>', or '- [ ] ... open: <next step and who owns it>'.
+      | A Stop hook holds the turn open while any unticked item has no blocked: or open: label.
+
+[2] Stop hook fires (stop_hook_active=false)
+    exit code: 0
+    stdout: (empty)  ->  turn ends
+    (no scope file yet, so there is nothing to enforce)
+
+[3] Claude writes .context/scope-d3m05e55.md with 3 items, does some of the work, tries to stop
+    Stop hook fires (stop_hook_active=false)
+    exit code: 0
+    stdout: {"decision": "block", "reason": ...}  ->  Claude keeps working. Reason:
+      | ops-kit: 3 scope item(s) in .context/scope-d3m05e55.md are unresolved, so the turn cannot end yet.
+      |   line 3 (unticked, no label): Add CSV export to the weekly report (done when: pytest tests/test_export.py passes)
+      |   line 4 (unticked, no label): Update the README usage section (done when: grep -c "export" README.md is above 0)
+      |   line 5 (unticked, no label): Email the sample file to Alex Sample at alex@example.com (done when: outbox shows the message)
+      | Give every listed item one of three end states in the scope file:
+      |   done: finish it, verify it, tick it '- [x]' and add 'evidence: <check output or id>'
+      |   blocked: keep '- [ ]' and add 'blocked: <first failing check and what the user must do>'
+      |   open: keep '- [ ]' and add 'open: <next step and who owns it>'
+
+[4] Claude ticks 2 items with evidence, labels 1 blocked, adds 1 open, tries again
+      | done      line 3   Add CSV export to the weekly report (done when: pytest tests/test_export.py passes) evidence: 6 passed in 0.41s
+      | done      line 4   Update the README usage section (done when: grep -c "export" README.md is above 0) evidence: grep count is 3
+      | blocked   line 5   Email the sample file to Alex Sample at alex@example.com (done when: outbox shows the message) blocked: no mail tool in this session. The user must send demo/sample.csv by hand.
+      | open      line 7   Add an XLSX export. open: next step is choosing a writer library, owner is the user
+      | 2 done, 1 blocked, 1 open, 0 unlabeled
+    Stop hook fires (stop_hook_active=true)
+    exit code: 0
+    stdout: {"systemMessage": "ops-kit: scope has 1 blocked and 1 open item(s) carried forward (.context/scope-d3m05e55.md)."}  ->  turn ends
+
+[5] Wrap-up skill runs write_summary.py --strict
+    exit code: 0
+      | wrote .context/session-summaries/2030-01-15-d3m05e55.md
+      | items: 2 done, 1 blocked, 1 open, 0 unlabeled
+
+--- .context/session-summaries/2030-01-15-d3m05e55.md ---
+# Session d3m05e55: Weekly report CSV export
+
+- Session: d3m05e55
+- Written: 2030-01-15 17:30 UTC
+- Scope file: .context/scope-d3m05e55.md
+- Items: 2 done, 1 blocked, 1 open, 0 unlabeled
+
+## Summary
+
+Added CSV export to the weekly report and documented it. Goal met except the email.
+Changed report/export.py, tests/test_export.py and README.md.
+Chose the standard csv module over a dataframe library to keep installs at zero.
+Next session: the XLSX export is still open and needs a library decision first.
+
+## Done (2)
+
+- Add CSV export to the weekly report (done when: pytest tests/test_export.py passes) evidence: 6 passed in 0.41s
+- Update the README usage section (done when: grep -c "export" README.md is above 0) evidence: grep count is 3
+
+## Blocked (1)
+
+- Email the sample file to Alex Sample at alex@example.com (done when: outbox shows the message) blocked: no mail tool in this session. The user must send demo/sample.csv by hand.
+
+## Open (1)
+
+- Add an XLSX export. open: next step is choosing a writer library, owner is the user
+
+--- .context/session-log.jsonl ---
+{"session": "d3m05e55", "written_at": "2030-01-15T17:30:00+00:00", "title": "Weekly report CSV export", "summary": "session d3m05e55: Added CSV export to the weekly report and documented it. Goal met except the email.", "counts": {"done": 2, "blocked": 1, "open": 1, "unlabeled": 0}, "summary_file": ".context/session-summaries/2030-01-15-d3m05e55.md"}
